@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Images to PDF Converter</title>
-    <meta name="description" content="Free online Images to PDF converter. Convert JPG, PNG and other images into a PDF.">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Free online image to PDF converter. Convert JPG, PNG and WEBP images into PDF.">
+
+    <title>Img2PDF — Image to PDF Converter</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -15,137 +20,473 @@
 
 <body>
 
-<header>
-    <div class="logo">📄 Img2PDF</div>
+<header class="header">
+
+    <div class="brand">
+        <div class="brand-icon">📄</div>
+        <span>Img2PDF</span>
+    </div>
 
     <nav>
         <a href="#converter">Converter</a>
-        <a href="#how">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
     </nav>
+
+    <button id="themeBtn" class="theme-btn">
+        🌙
+    </button>
+
 </header>
+
 
 <main>
 
-    <section class="hero">
-        <h1>Images to PDF Converter</h1>
+<section class="hero">
+
+    <div class="badge">
+        ⚡ 100% Browser Based
+    </div>
+
+    <h1>
+        Convert Images<br>
+        <span>to PDF</span>
+    </h1>
+
+    <p>
+        Convert JPG, PNG and WEBP images into a single
+        high-quality PDF quickly and securely.
+    </p>
+
+</section>
+
+
+<section id="converter" class="converter">
+
+    <!-- Upload area -->
+
+    <div id="dropZone" class="drop-zone">
+
+        <div class="upload-icon">
+            📁
+        </div>
+
+        <h2>
+            Drop your images here
+        </h2>
 
         <p>
-            Convert JPG, PNG and other images into a single PDF.
-            Fast, free and completely browser-based.
+            or select files from your device
         </p>
-    </section>
 
-    <section id="converter" class="converter">
+        <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+            multiple
+        >
 
-        <div id="dropZone" class="drop-zone">
+        <div class="supported">
+            JPG · JPEG · PNG · WEBP
+        </div>
 
-            <div class="upload-icon">📁</div>
+    </div>
 
-            <h2>Drop your images here</h2>
 
-            <p>or</p>
+    <!-- Settings -->
 
-            <label for="imageInput" class="upload-btn">
+    <div class="settings">
+
+        <div class="setting">
+
+            <label for="pageSize">
+                📄 Page Size
+            </label>
+
+            <select id="pageSize">
+
+                <option value="a4">
+                    A4
+                </option>
+
+                <option value="a3">
+                    A3
+                </option>
+
+                <option value="letter">
+                    Letter
+                </option>
+
+                <option value="fit">
+                    Fit Image
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="setting">
+
+            <label for="orientation">
+                ↕️ Orientation
+            </label>
+
+            <select id="orientation">
+
+                <option value="auto">
+                    Auto
+                </option>
+
+                <option value="portrait">
+                    Portrait
+                </option>
+
+                <option value="landscape">
+                    Landscape
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="setting">
+
+            <label for="margin">
+                📐 Margin
+            </label>
+
+            <select id="margin">
+
+                <option value="0">
+                    None
+                </option>
+
+                <option value="5">
+                    Small
+                </option>
+
+                <option value="10" selected>
+                    Medium
+                </option>
+
+                <option value="20">
+                    Large
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="setting">
+
+            <label for="quality">
+                🗜️ Quality
+            </label>
+
+            <select id="quality">
+
+                <option value="0.6">
+                    Low
+                </option>
+
+                <option value="0.8" selected>
+                    Medium
+                </option>
+
+                <option value="1">
+                    High
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- Filename -->
+
+    <div class="filename">
+
+        <label for="pdfName">
+            PDF Filename
+        </label>
+
+        <input
+            id="pdfName"
+            type="text"
+            value="images-to-pdf"
+            placeholder="Enter filename"
+        >
+
+        <span>.pdf</span>
+
+    </div>
+
+
+    <!-- Image count -->
+
+    <div class="image-toolbar">
+
+        <div>
+            <strong id="imageCount">
+                0 images
+            </strong>
+        </div>
+
+        <button
+            id="clearBtn"
+            class="clear-btn"
+            disabled
+        >
+            🗑️ Clear All
+        </button>
+
+    </div>
+
+
+    <!-- Preview -->
+
+    <div id="preview" class="preview">
+
+        <div class="empty">
+
+            <div>
+                🖼️
+            </div>
+
+            <p>
+                Your selected images will appear here
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Progress -->
+
+    <div
+        id="progressContainer"
+        class="progress-container"
+        hidden
+    >
+
+        <div class="progress-text">
+
+            <span>
+                Creating PDF...
+            </span>
+
+            <span id="progressPercent">
+                0%
+            </span>
+
+        </div>
+
+        <div class="progress">
+
+            <div
+                id="progressBar"
+                class="progress-bar"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Convert -->
+
+    <button
+        id="convertBtn"
+        class="convert-btn"
+        disabled
+    >
+
+        📄 Convert to PDF
+
+    </button>
+
+    <p class="privacy">
+        🔒 Your images never leave your device.
+    </p>
+
+</section>
+
+
+<!-- Features -->
+
+<section id="features" class="features">
+
+    <h2>
+        Powerful & Simple
+    </h2>
+
+    <div class="feature-grid">
+
+        <div class="feature">
+
+            <div>🔒</div>
+
+            <h3>
+                Private
+            </h3>
+
+            <p>
+                Images are processed directly in your browser.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div>⚡</div>
+
+            <h3>
+                Fast
+            </h3>
+
+            <p>
+                No server uploads or waiting for processing.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div>📱</div>
+
+            <h3>
+                Mobile Friendly
+            </h3>
+
+            <p>
+                Works on phones, tablets and computers.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div>🆓</div>
+
+            <h3>
+                Free
+            </h3>
+
+            <p>
+                No registration or subscription required.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- How it works -->
+
+<section id="how" class="how">
+
+    <h2>
+        How It Works
+    </h2>
+
+    <div class="steps">
+
+        <div>
+
+            <span>1</span>
+
+            <h3>
                 Select Images
-            </label>
+            </h3>
 
-            <input
-                type="file"
-                id="imageInput"
-                accept="image/*"
-                multiple
-                hidden
-            >
-
-            <small>
-                JPG, JPEG, PNG, WEBP and other browser-supported images
-            </small>
+            <p>
+                Choose one or multiple images.
+            </p>
 
         </div>
 
-        <div class="controls">
 
-            <label>
-                Page Size
+        <div>
 
-                <select id="pageSize">
-                    <option value="a4">A4</option>
-                    <option value="letter">Letter</option>
-                    <option value="a3">A3</option>
-                    <option value="fit">Fit Image</option>
-                </select>
-            </label>
+            <span>2</span>
 
-            <label>
-                Orientation
+            <h3>
+                Arrange
+            </h3>
 
-                <select id="orientation">
-                    <option value="auto">Auto</option>
-                    <option value="portrait">Portrait</option>
-                    <option value="landscape">Landscape</option>
-                </select>
-            </label>
-
-            <label>
-                Margin
-
-                <select id="margin">
-                    <option value="0">None</option>
-                    <option value="5">Small</option>
-                    <option value="10" selected>Medium</option>
-                    <option value="20">Large</option>
-                </select>
-            </label>
+            <p>
+                Drag images to change their order.
+            </p>
 
         </div>
 
-        <div id="preview" class="preview"></div>
 
-        <button id="convertBtn" class="convert-btn" disabled>
-            Convert to PDF
-        </button>
+        <div>
 
-        <button id="clearBtn" class="clear-btn" disabled>
-            Clear Images
-        </button>
+            <span>3</span>
 
-    </section>
+            <h3>
+                Customize
+            </h3>
 
-    <section id="how" class="how">
-
-        <h2>How It Works</h2>
-
-        <div class="steps">
-
-            <div>
-                <span>1</span>
-                <h3>Select Images</h3>
-                <p>Choose one or multiple images from your device.</p>
-            </div>
-
-            <div>
-                <span>2</span>
-                <h3>Arrange</h3>
-                <p>Preview your images before creating the PDF.</p>
-            </div>
-
-            <div>
-                <span>3</span>
-                <h3>Convert</h3>
-                <p>Click Convert to PDF and download your document.</p>
-            </div>
+            <p>
+                Select page size, orientation and quality.
+            </p>
 
         </div>
 
-    </section>
+
+        <div>
+
+            <span>4</span>
+
+            <h3>
+                Download
+            </h3>
+
+            <p>
+                Generate and download your PDF.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
 
 </main>
 
+
 <footer>
-    <p>© 2026 Img2PDF · Free Images to PDF Converter</p>
+
+    <div class="footer-logo">
+        📄 Img2PDF
+    </div>
+
+    <p>
+        Free Image to PDF Converter
+    </p>
+
+    <p>
+        © 2026 Img2PDF
+    </p>
+
 </footer>
+
 
 <script src="script.js"></script>
 
 </body>
+
 </html>
