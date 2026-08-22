@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Images to PDF Converter</title>
+    <meta name="description" content="Free online Images to PDF converter. Convert JPG, PNG and other images into a PDF.">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">📄 Img2PDF</div>
+
+    <nav>
+        <a href="#converter">Converter</a>
+        <a href="#how">How It Works</a>
+    </nav>
+</header>
+
+<main>
+
+    <section class="hero">
+        <h1>Images to PDF Converter</h1>
+
+        <p>
+            Convert JPG, PNG and other images into a single PDF.
+            Fast, free and completely browser-based.
+        </p>
+    </section>
+
+    <section id="converter" class="converter">
+
+        <div id="dropZone" class="drop-zone">
+
+            <div class="upload-icon">📁</div>
+
+            <h2>Drop your images here</h2>
+
+            <p>or</p>
+
+            <label for="imageInput" class="upload-btn">
+                Select Images
+            </label>
+
+            <input
+                type="file"
+                id="imageInput"
+                accept="image/*"
+                multiple
+                hidden
+            >
+
+            <small>
+                JPG, JPEG, PNG, WEBP and other browser-supported images
+            </small>
+
+        </div>
+
+        <div class="controls">
+
+            <label>
+                Page Size
+
+                <select id="pageSize">
+                    <option value="a4">A4</option>
+                    <option value="letter">Letter</option>
+                    <option value="a3">A3</option>
+                    <option value="fit">Fit Image</option>
+                </select>
+            </label>
+
+            <label>
+                Orientation
+
+                <select id="orientation">
+                    <option value="auto">Auto</option>
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
+                </select>
+            </label>
+
+            <label>
+                Margin
+
+                <select id="margin">
+                    <option value="0">None</option>
+                    <option value="5">Small</option>
+                    <option value="10" selected>Medium</option>
+                    <option value="20">Large</option>
+                </select>
+            </label>
+
+        </div>
+
+        <div id="preview" class="preview"></div>
+
+        <button id="convertBtn" class="convert-btn" disabled>
+            Convert to PDF
+        </button>
+
+        <button id="clearBtn" class="clear-btn" disabled>
+            Clear Images
+        </button>
+
+    </section>
+
+    <section id="how" class="how">
+
+        <h2>How It Works</h2>
+
+        <div class="steps">
+
+            <div>
+                <span>1</span>
+                <h3>Select Images</h3>
+                <p>Choose one or multiple images from your device.</p>
+            </div>
+
+            <div>
+                <span>2</span>
+                <h3>Arrange</h3>
+                <p>Preview your images before creating the PDF.</p>
+            </div>
+
+            <div>
+                <span>3</span>
+                <h3>Convert</h3>
+                <p>Click Convert to PDF and download your document.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 Img2PDF · Free Images to PDF Converter</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
