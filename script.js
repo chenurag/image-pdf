@@ -1,268 +1,959 @@
 const { jsPDF } = window.jspdf;
 
-const imageInput = document.getElementById("imageInput");
-const dropZone = document.getElementById("dropZone");
-const preview = document.getElementById("preview");
-const convertBtn = document.getElementById("convertBtn");
-const clearBtn = document.getElementById("clearBtn");
 
-const pageSize = document.getElementById("pageSize");
-const orientation = document.getElementById("orientation");
-const margin = document.getElementById("margin");
+/* ELEMENTS */
+
+const imageInput =
+    document.getElementById("imageInput");
+
+const dropZone =
+    document.getElementById("dropZone");
+
+const preview =
+    document.getElementById("preview");
+
+const convertBtn =
+    document.getElementById("convertBtn");
+
+const clearBtn =
+    document.getElementById("clearBtn");
+
+const imageCount =
+    document.getElementById("imageCount");
+
+const pageSize =
+    document.getElementById("pageSize");
+
+const orientation =
+    document.getElementById("orientation");
+
+const margin =
+    document.getElementById("margin");
+
+const quality =
+    document.getElementById("quality");
+
+const pdfName =
+    document.getElementById("pdfName");
+
+const progressContainer =
+    document.getElementById(
+        "progressContainer"
+    );
+
+const progressBar =
+    document.getElementById("progressBar");
+
+const progressPercent =
+    document.getElementById(
+        "progressPercent"
+    );
+
+const themeBtn =
+    document.getElementById("themeBtn");
+
+
+/* DATA */
 
 let images = [];
 
-imageInput.addEventListener("change", function () {
-    addImages(this.files);
-});
+let draggedIndex = null;
 
-dropZone.addEventListener("dragover", function (event) {
-    event.preventDefault();
-    dropZone.classList.add("dragover");
-});
 
-dropZone.addEventListener("dragleave", function () {
-    dropZone.classList.remove("dragover");
-});
+/* SELECT IMAGES */
 
-dropZone.addEventListener("drop", function (event) {
-    event.preventDefault();
+imageInput.addEventListener(
+    "change",
+    event => {
 
-    dropZone.classList.remove("dragover");
+        addImages(event.target.files);
 
-    addImages(event.dataTransfer.files);
-});
+        /*
+         * Allows the user to select
+         * the same file again later.
+         */
+
+        imageInput.value = "";
+
+    }
+);
+
+
+/* ADD IMAGES */
 
 function addImages(files) {
 
     for (const file of files) {
 
         if (!file.type.startsWith("image/")) {
+
             continue;
+
         }
 
-        images.push(file);
+        images.push({
+
+            file: file,
+
+            rotation: 0
+
+        });
+
     }
 
     renderPreview();
+
 }
+
+
+/* DRAG & DROP */
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "dragover"
+        );
+
+    }
+);
+
+dropZone.addEventListener(
+    "dragleave",
+    () => {
+
+        dropZone.classList.remove(
+            "dragover"
+        );
+
+    }
+);
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "dragover"
+        );
+
+        addImages(
+            event.dataTransfer.files
+        );
+
+    }
+);
+
+
+/* RENDER */
 
 function renderPreview() {
 
     preview.innerHTML = "";
 
-    images.forEach((file, index) => {
+    imageCount.textContent =
+        `${images.length} ${
+            images.length === 1
+                ? "image"
+                : "images"
+        }`;
 
-        const card = document.createElement("div");
-        card.className = "image-card";
+    convertBtn.disabled =
+        images.length === 0;
 
-        const img = document.createElement("img");
+    clearBtn.disabled =
+        images.length === 0;
 
-        img.src = URL.createObjectURL(file);
-
-        const number = document.createElement("div");
-        number.className = "image-number";
-        number.textContent = `Image ${index + 1}`;
-
-        const remove = document.createElement("button");
-        remove.className = "remove-btn";
-        remove.textContent = "×";
-
-        remove.onclick = function () {
-
-            images.splice(index, 1);
-
-            renderPreview();
-        };
-
-        card.appendChild(img);
-        card.appendChild(number);
-        card.appendChild(remove);
-
-        preview.appendChild(card);
-    });
-
-    convertBtn.disabled = images.length === 0;
-    clearBtn.disabled = images.length === 0;
-}
-
-clearBtn.addEventListener("click", function () {
-
-    images = [];
-
-    imageInput.value = "";
-
-    renderPreview();
-});
-
-convertBtn.addEventListener("click", async function () {
 
     if (images.length === 0) {
+
+        preview.innerHTML = `
+
+            <div class="empty">
+
+                <div>🖼️</div>
+
+                <p>
+                    Your selected images
+                    will appear here
+                </p>
+
+            </div>
+
+        `;
+
         return;
+
     }
 
-    convertBtn.disabled = true;
-    convertBtn.textContent = "Creating PDF...";
 
-    try {
+    images.forEach(
+        (item, index) => {
 
-        let pdf = null;
-
-        for (let i = 0; i < images.length; i++) {
-
-            const file = images[i];
-
-            const dataURL = await fileToDataURL(file);
-
-            const img = await loadImage(dataURL);
-
-            let format = pageSize.value;
-
-            if (format === "fit") {
-
-                const width = img.width;
-                const height = img.height;
-
-                const pdfWidth = width / 3.78;
-                const pdfHeight = height / 3.78;
-
-                const pageOrientation =
-                    width > height ? "landscape" : "portrait";
-
-                if (!pdf) {
-
-                    pdf = new jsPDF({
-                        orientation: pageOrientation,
-                        unit: "mm",
-                        format: [pdfWidth, pdfHeight]
-                    });
-
-                } else {
-
-                    pdf.addPage(
-                        [pdfWidth, pdfHeight],
-                        pageOrientation
-                    );
-                }
-
-                pdf.addImage(
-                    dataURL,
-                    getImageFormat(file),
-                    0,
-                    0,
-                    pdfWidth,
-                    pdfHeight
+            const card =
+                document.createElement(
+                    "div"
                 );
 
-                continue;
-            }
+            card.className =
+                "image-card";
 
-            let pageOrientation = orientation.value;
+            card.draggable = true;
 
-            if (pageOrientation === "auto") {
-                pageOrientation =
-                    img.width > img.height
-                        ? "landscape"
-                        : "portrait";
-            }
 
-            if (i === 0) {
+            /* IMAGE */
 
-                pdf = new jsPDF({
-                    orientation: pageOrientation,
-                    unit: "mm",
-                    format: format
-                });
+            const img =
+                document.createElement(
+                    "img"
+                );
 
-            } else {
+            img.src =
+                URL.createObjectURL(
+                    item.file
+                );
 
-                pdf.addPage(format, pageOrientation);
-            }
+            img.style.transform =
+                `rotate(${item.rotation}deg)`;
 
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
 
-            const m = Number(margin.value);
+            /* NUMBER */
 
-            const availableWidth = pageWidth - m * 2;
-            const availableHeight = pageHeight - m * 2;
+            const number =
+                document.createElement(
+                    "div"
+                );
 
-            const imageRatio = img.width / img.height;
+            number.className =
+                "image-number";
 
-            let width = availableWidth;
-            let height = width / imageRatio;
+            number.textContent =
+                `Image ${index + 1}`;
 
-            if (height > availableHeight) {
 
-                height = availableHeight;
-                width = height * imageRatio;
-            }
+            /* BUTTONS */
 
-            const x = (pageWidth - width) / 2;
-            const y = (pageHeight - height) / 2;
+            const buttons =
+                document.createElement(
+                    "div"
+                );
 
-            pdf.addImage(
-                dataURL,
-                getImageFormat(file),
-                x,
-                y,
-                width,
-                height
+            buttons.className =
+                "card-buttons";
+
+
+            const rotate =
+                document.createElement(
+                    "button"
+                );
+
+            rotate.className =
+                "rotate-btn";
+
+            rotate.textContent =
+                "🔄";
+
+            rotate.title =
+                "Rotate";
+
+
+            rotate.onclick = () => {
+
+                item.rotation =
+                    (item.rotation + 90)
+                    % 360;
+
+                renderPreview();
+
+            };
+
+
+            const deleteBtn =
+                document.createElement(
+                    "button"
+                );
+
+            deleteBtn.className =
+                "delete-btn";
+
+            deleteBtn.textContent =
+                "🗑️";
+
+            deleteBtn.title =
+                "Delete";
+
+
+            deleteBtn.onclick = () => {
+
+                images.splice(
+                    index,
+                    1
+                );
+
+                renderPreview();
+
+            };
+
+
+            buttons.appendChild(
+                rotate
             );
+
+            buttons.appendChild(
+                deleteBtn
+            );
+
+
+            card.appendChild(img);
+
+            card.appendChild(number);
+
+            card.appendChild(buttons);
+
+
+            /* DRAG REORDER */
+
+            card.addEventListener(
+                "dragstart",
+                () => {
+
+                    draggedIndex =
+                        index;
+
+                    card.style.opacity =
+                        "0.5";
+
+                }
+            );
+
+
+            card.addEventListener(
+                "dragend",
+                () => {
+
+                    card.style.opacity =
+                        "1";
+
+                }
+            );
+
+
+            card.addEventListener(
+                "dragover",
+                event => {
+
+                    event.preventDefault();
+
+                }
+            );
+
+
+            card.addEventListener(
+                "drop",
+                event => {
+
+                    event.preventDefault();
+
+                    if (
+                        draggedIndex === null ||
+                        draggedIndex === index
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const moved =
+                        images.splice(
+                            draggedIndex,
+                            1
+                        )[0];
+
+
+                    images.splice(
+                        index,
+                        0,
+                        moved
+                    );
+
+
+                    draggedIndex = null;
+
+                    renderPreview();
+
+                }
+            );
+
+
+            preview.appendChild(card);
+
+        }
+    );
+
+}
+
+
+/* CLEAR */
+
+clearBtn.addEventListener(
+    "click",
+    () => {
+
+        images = [];
+
+        renderPreview();
+
+    }
+);
+
+
+/* CONVERT */
+
+convertBtn.addEventListener(
+    "click",
+    async () => {
+
+        if (!images.length) {
+
+            alert(
+                "Please select images first."
+            );
+
+            return;
+
         }
 
-        pdf.save("images-to-pdf.pdf");
 
-    } catch (error) {
+        convertBtn.disabled = true;
 
-        console.error(error);
+        progressContainer.hidden =
+            false;
 
-        alert("Something went wrong while creating the PDF.");
+        progressBar.style.width =
+            "0%";
 
-    } finally {
+        progressPercent.textContent =
+            "0%";
 
-        convertBtn.disabled = false;
-        convertBtn.textContent = "Convert to PDF";
+
+        try {
+
+            let pdf = null;
+
+
+            for (
+                let i = 0;
+                i < images.length;
+                i++
+            ) {
+
+                const item =
+                    images[i];
+
+
+                /*
+                 * Compress image
+                 */
+
+                const data =
+                    await processImage(
+                        item.file,
+                        item.rotation
+                    );
+
+
+                const img =
+                    await loadImage(data);
+
+
+                /*
+                 * Orientation
+                 */
+
+                let pdfOrientation =
+                    orientation.value;
+
+
+                if (
+                    pdfOrientation ===
+                    "auto"
+                ) {
+
+                    pdfOrientation =
+                        img.width >
+                        img.height
+                            ? "landscape"
+                            : "portrait";
+
+                }
+
+
+                /*
+                 * Fit image
+                 */
+
+                if (
+                    pageSize.value ===
+                    "fit"
+                ) {
+
+                    const width =
+                        img.width / 3.78;
+
+                    const height =
+                        img.height / 3.78;
+
+
+                    if (!pdf) {
+
+                        pdf =
+                            new jsPDF({
+
+                                orientation:
+                                    pdfOrientation,
+
+                                unit: "mm",
+
+                                format:
+                                    [
+                                        width,
+                                        height
+                                    ]
+
+                            });
+
+                    } else {
+
+                        pdf.addPage(
+                            [
+                                width,
+                                height
+                            ],
+                            pdfOrientation
+                        );
+
+                    }
+
+
+                    pdf.addImage(
+                        data,
+                        "JPEG",
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+                }
+
+                else {
+
+                    /*
+                     * Standard page
+                     */
+
+                    if (!pdf) {
+
+                        pdf =
+                            new jsPDF({
+
+                                orientation:
+                                    pdfOrientation,
+
+                                unit: "mm",
+
+                                format:
+                                    pageSize.value
+
+                            });
+
+                    } else {
+
+                        pdf.addPage(
+                            pageSize.value,
+                            pdfOrientation
+                        );
+
+                    }
+
+
+                    const pageWidth =
+                        pdf.internal
+                        .pageSize
+                        .getWidth();
+
+
+                    const pageHeight =
+                        pdf.internal
+                        .pageSize
+                        .getHeight();
+
+
+                    const m =
+                        Number(
+                            margin.value
+                        );
+
+
+                    const availableWidth =
+                        pageWidth -
+                        m * 2;
+
+
+                    const availableHeight =
+                        pageHeight -
+                        m * 2;
+
+
+                    const ratio =
+                        img.width /
+                        img.height;
+
+
+                    let width =
+                        availableWidth;
+
+
+                    let height =
+                        width /
+                        ratio;
+
+
+                    if (
+                        height >
+                        availableHeight
+                    ) {
+
+                        height =
+                            availableHeight;
+
+                        width =
+                            height *
+                            ratio;
+
+                    }
+
+
+                    const x =
+                        (
+                            pageWidth -
+                            width
+                        ) / 2;
+
+
+                    const y =
+                        (
+                            pageHeight -
+                            height
+                        ) / 2;
+
+
+                    pdf.addImage(
+                        data,
+                        "JPEG",
+                        x,
+                        y,
+                        width,
+                        height
+                    );
+
+                }
+
+
+                /*
+                 * Progress
+                 */
+
+                const percent =
+                    Math.round(
+                        (
+                            (i + 1) /
+                            images.length
+                        ) * 100
+                    );
+
+
+                progressBar.style.width =
+                    `${percent}%`;
+
+                progressPercent.textContent =
+                    `${percent}%`;
+
+
+                /*
+                 * Give browser
+                 * time to update UI
+                 */
+
+                await sleep(50);
+
+            }
+
+
+            /*
+             * Filename
+             */
+
+            let filename =
+                pdfName.value.trim();
+
+
+            if (!filename) {
+
+                filename =
+                    "images-to-pdf";
+
+            }
+
+
+            if (
+                filename
+                .toLowerCase()
+                .endsWith(".pdf")
+            ) {
+
+                filename =
+                    filename.slice(
+                        0,
+                        -4
+                    );
+
+            }
+
+
+            pdf.save(
+                `${filename}.pdf`
+            );
+
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                "An error occurred while creating the PDF."
+            );
+
+        }
+
+
+        convertBtn.disabled =
+            images.length === 0;
+
     }
-});
+);
 
-function fileToDataURL(file) {
 
-    return new Promise((resolve, reject) => {
+/* PROCESS IMAGE */
 
-        const reader = new FileReader();
+function processImage(
+    file,
+    rotation
+) {
 
-        reader.onload = () => resolve(reader.result);
+    return new Promise(
+        (resolve, reject) => {
 
-        reader.onerror = reject;
+            const reader =
+                new FileReader();
 
-        reader.readAsDataURL(file);
-    });
+
+            reader.onload =
+                event => {
+
+                    const img =
+                        new Image();
+
+
+                    img.onload = () => {
+
+                        const canvas =
+                            document
+                            .createElement(
+                                "canvas"
+                            );
+
+
+                        const ctx =
+                            canvas.getContext(
+                                "2d"
+                            );
+
+
+                        const angle =
+                            rotation *
+                            Math.PI /
+                            180;
+
+
+                        const rotated =
+                            rotation === 90 ||
+                            rotation === 270;
+
+
+                        canvas.width =
+                            rotated
+                                ? img.height
+                                : img.width;
+
+
+                        canvas.height =
+                            rotated
+                                ? img.width
+                                : img.height;
+
+
+                        ctx.translate(
+                            canvas.width / 2,
+                            canvas.height / 2
+                        );
+
+
+                        ctx.rotate(angle);
+
+
+                        ctx.drawImage(
+                            img,
+                            -img.width / 2,
+                            -img.height / 2
+                        );
+
+
+                        const q =
+                            Number(
+                                quality.value
+                            );
+
+
+                        resolve(
+                            canvas.toDataURL(
+                                "image/jpeg",
+                                q
+                            )
+                        );
+
+                    };
+
+
+                    img.onerror =
+                        reject;
+
+
+                    img.src =
+                        event.target.result;
+
+                };
+
+
+            reader.onerror =
+                reject;
+
+
+            reader.readAsDataURL(file);
+
+        }
+    );
+
 }
+
+
+/* LOAD IMAGE */
 
 function loadImage(src) {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        (resolve, reject) => {
 
-        const img = new Image();
+            const img =
+                new Image();
 
-        img.onload = () => resolve(img);
+            img.onload =
+                () => resolve(img);
 
-        img.onerror = reject;
+            img.onerror =
+                reject;
 
-        img.src = src;
-    });
+            img.src = src;
+
+        }
+    );
+
 }
 
-function getImageFormat(file) {
 
-    if (file.type === "image/png") {
-        return "PNG";
-    }
+/* SLEEP */
 
-    if (file.type === "image/webp") {
-        return "WEBP";
-    }
+function sleep(ms) {
 
-    return "JPEG";
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+    );
+
 }
+
+
+/* DARK MODE */
+
+themeBtn.addEventListener(
+    "click",
+    () => {
+
+        document.body.classList.toggle(
+            "dark"
+        );
+
+
+        const dark =
+            document.body.classList.contains(
+                "dark"
+            );
+
+
+        themeBtn.textContent =
+            dark
+                ? "☀️"
+                : "🌙";
+
+
+        localStorage.setItem(
+            "darkMode",
+            dark
+        );
+
+    }
+);
+
+
+/* RESTORE THEME */
+
+if (
+    localStorage.getItem(
+        "darkMode"
+    ) === "true"
+) {
+
+    document.body.classList.add(
+        "dark"
+    );
+
+    themeBtn.textContent =
+        "☀️";
+
+}
+
+
+/* INITIAL */
+
+renderPreview();
